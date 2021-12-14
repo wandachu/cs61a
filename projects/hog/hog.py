@@ -253,7 +253,12 @@ def make_averaged(original_function, trials_count=1000):
     3.0
     """
     # BEGIN PROBLEM 8
-    "*** YOUR CODE HERE ***"
+    def average(*args):
+        total, count = 0, 0
+        for _ in range(trials_count):
+            total, count = total + original_function(*args), count + 1
+        return total / count
+    return average
     # END PROBLEM 8
 
 
@@ -267,7 +272,13 @@ def max_scoring_num_rolls(dice=six_sided, trials_count=1000):
     1
     """
     # BEGIN PROBLEM 9
-    "*** YOUR CODE HERE ***"
+    max_num, max_ave = 0, 0
+    average_dice = make_averaged(roll_dice, trials_count)
+    for i in range(1, 11):
+        current_average = average_dice(i, dice)
+        if current_average > max_ave:
+            max_num, max_ave = i, current_average
+    return max_num
     # END PROBLEM 9
 
 
@@ -296,10 +307,10 @@ def run_experiments():
     print('Max scoring num rolls for six-sided dice:', six_sided_max)
     print('always_roll(6) win rate:', average_win_rate(always_roll(6)))
 
-    #print('always_roll(8) win rate:', average_win_rate(always_roll(8)))
-    #print('picky_piggy_strategy win rate:', average_win_rate(picky_piggy_strategy))
+    print('always_roll(8) win rate:', average_win_rate(always_roll(8)))
+    print('picky_piggy_strategy win rate:', average_win_rate(picky_piggy_strategy))
     print('hog_pile_strategy win rate:', average_win_rate(hog_pile_strategy))
-    #print('final_strategy win rate:', average_win_rate(final_strategy))
+    print('final_strategy win rate:', average_win_rate(final_strategy))
     "*** You may add additional experiments as you wish ***"
 
 
@@ -308,7 +319,10 @@ def picky_piggy_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     returns NUM_ROLLS otherwise.
     """
     # BEGIN PROBLEM 10
-    return 6  # Remove this line once implemented.
+    pp_score = picky_piggy(opponent_score)
+    if pp_score >= cutoff:
+        return 0
+    return num_rolls
     # END PROBLEM 10
 
 
@@ -318,7 +332,9 @@ def hog_pile_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     Otherwise, it returns NUM_ROLLS.
     """
     # BEGIN PROBLEM 11
-    return 6  # Remove this line once implemented.
+    if score + picky_piggy(opponent_score) == opponent_score:
+        return 0
+    return picky_piggy_strategy(score, opponent_score, cutoff, num_rolls)
     # END PROBLEM 11
 
 
