@@ -133,15 +133,6 @@ def cycle(f1, f2, f3):
             time = n
             if time == 0:
                 return x
-            # list = [f1, f2, f3]
-            # counter = 0
-            # while time > 0:
-            #     x = list[counter](x)
-            #     counter += 1
-            #     if counter == len(list):
-            #         counter = 0
-            #     time -= 1
             return cycle(f2, f3, f1)(n - 1)(f1(x))
-            return x
         return final
     return func
