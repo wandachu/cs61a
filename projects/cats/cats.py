@@ -146,7 +146,10 @@ def autocorrect(typed_word, valid_words, diff_function, limit):
     'testing'
     """
     # BEGIN PROBLEM 5
-    "*** YOUR CODE HERE ***"
+    if typed_word in valid_words:
+        return typed_word
+    min_word = min(valid_words, key=lambda word: diff_function(typed_word, word, limit))
+    return min_word if diff_function(typed_word, min_word, limit) <= limit else typed_word
     # END PROBLEM 5
 
 
@@ -173,7 +176,15 @@ def feline_flips(start, goal, limit):
     5
     """
     # BEGIN PROBLEM 6
-    assert False, 'Remove this line'
+    def inner(start, goal, limit, current_diff):
+        if current_diff > limit:  # No need to check for the rest if already over limit.
+            return current_diff
+        if not start and not goal:  # If both empty, then return current_diff
+            return current_diff
+        if not start or not goal:  # if one is empty, then do one last recursive call.
+            return inner("", "", limit, current_diff + abs(len(goal) - len(start)))
+        return inner(start[1:], goal[1:], limit, current_diff + (start[0] != goal[0]))
+    return inner(start, goal, limit, 0)
     # END PROBLEM 6
 
 
@@ -194,25 +205,38 @@ def minimum_mewtations(start, goal, limit):
     >>> minimum_mewtations("ckiteus", "kittens", big_limit) # ckiteus -> kiteus -> kitteus -> kittens
     3
     """
-    assert False, 'Remove this line'
+    # Approach 1: use helper function for tail recursion.
+    # def inner(start, goal, limit, current_diff):
+    #     if current_diff > limit:
+    #         return current_diff
+    #     if start == goal or (not start and not goal):
+    #         return current_diff
+    #     if not start or not goal:
+    #         return inner("", "", limit, current_diff + abs(len(goal) - len(start)))
+    #     if start[0] == goal[0]:
+    #         return inner(start[1:], goal[1:], limit, current_diff)
+    #     add = inner(start, goal[1:], limit, current_diff + 1)
+    #     remove = inner(start[1:], goal, limit, current_diff + 1)
+    #     substitute = inner(start[1:], goal[1:], limit, current_diff + 1)
+    #     min_change = min(add, remove, substitute)
+    #     return min_change
+    # return inner(start, goal, limit, 0)
 
-    if ______________:  # Fill in the condition
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-
-    elif ___________:  # Feel free to remove or add additional cases
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-
-    else:
-        add = ...  # Fill in these lines
-        remove = ...
-        substitute = ...
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
+    # Approach 2: update the limit parameter to exit early.
+    if start == goal:
+        return 0
+    if limit == 0:
+        return limit + 1
+    if not start:
+        return 1 + minimum_mewtations(goal[0], goal, limit - 1)  # add one letter to start
+    if not goal:
+        return 1 + minimum_mewtations(start[1:], goal, limit - 1)  # remove one letter from start
+    if start[0] == goal[0]:
+        return minimum_mewtations(start[1:], goal[1:], limit)
+    add = 1 + minimum_mewtations(start, goal[1:], limit - 1)
+    remove = 1 + minimum_mewtations(start[1:], goal, limit - 1)
+    substitute = 1 + minimum_mewtations(start[1:], goal[1:], limit - 1)
+    return min(add, remove, substitute)
 
 
 def final_diff(start, goal, limit):
