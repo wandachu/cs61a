@@ -112,6 +112,7 @@ class Ant(Insect):
     def __init__(self, health=1):
         """Create an Insect with a HEALTH quantity."""
         super().__init__(health)
+        self.doubled = False
 
     @classmethod
     def construct(cls, gamestate):
@@ -158,6 +159,9 @@ class Ant(Insect):
         """Double this ants's damage, if it has not already been buffed."""
         # BEGIN Problem 12
         "*** YOUR CODE HERE ***"
+        if not self.doubled:
+            self.damage *= 2
+            self.doubled = True
         # END Problem 12
 
 
@@ -441,7 +445,6 @@ class QueenAnt(ScubaThrower):
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem 12
     implemented = True   # Change to True to view in the GUI
-    buffed = []
       
     def remove_from(self, place):
         """The queen cannot be removed."""
@@ -458,7 +461,7 @@ class QueenAnt(ScubaThrower):
         "*** YOUR CODE HERE ***"
         if not gamestate.has_queen:
             gamestate.has_queen = True
-            return super(cls, cls).construct(gamestate)
+            return super().construct(gamestate)
         return None
         # END Problem 12
 
@@ -471,16 +474,12 @@ class QueenAnt(ScubaThrower):
         super().action(gamestate)
         
         curr_place = self.place.exit
-        while curr_place is not None:
+        while curr_place:
             ant_in_place = curr_place.ant
-            if ant_in_place and ant_in_place not in self.buffed:
-                ant_in_place.damage *= 2
-                self.buffed.append(ant_in_place)
-            if ant_in_place and ant_in_place.is_container and ant_in_place.ant_contained:
-                inner_ant = ant_in_place.ant_contained
-                if inner_ant not in self.buffed:
-                    inner_ant.damage *= 2
-                    self.buffed.append(inner_ant)
+            if ant_in_place:
+                ant_in_place.buff()
+                if ant_in_place.is_container and ant_in_place.ant_contained:
+                    ant_in_place.ant_contained.buff()
             curr_place = curr_place.exit
         # END Problem 12
 
