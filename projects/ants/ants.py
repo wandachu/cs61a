@@ -54,6 +54,7 @@ class Insect:
 
     damage = 0
     # ADD CLASS ATTRIBUTES HERE
+    is_waterproof = False
 
     def __init__(self, health, place=None):
         """Create an Insect with a health amount and a starting PLACE."""
@@ -417,24 +418,34 @@ class Water(Place):
         its health to 0."""
         # BEGIN Problem 10
         "*** YOUR CODE HERE ***"
+        super().add_insect(insect)
+        if not insect.is_waterproof:
+            insect.reduce_health(insect.health)
         # END Problem 10
 
 # BEGIN Problem 11
 # The ScubaThrower class
+class ScubaThrower(ThrowerAnt):
+    """ScubaThrower is more costly and waterproof, but otherwise identical to
+    its base class."""
+    name = "Scuba"
+    food_cost = 6
+    implemented = True
+    is_waterproof = True
 # END Problem 11
 
-# BEGIN Problem 12
-
-
-class QueenAnt(Ant):  # You should change this line
-# END Problem 12
+class QueenAnt(ScubaThrower):
     """The Queen of the colony. The game is over if a bee enters her place."""
-
     name = 'Queen'
     food_cost = 7
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem 12
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
+    buffed = []
+      
+    def remove_from(self, place):
+        """The queen cannot be removed."""
+        pass
     # END Problem 12
 
     @classmethod
@@ -445,6 +456,10 @@ class QueenAnt(Ant):  # You should change this line
         """
         # BEGIN Problem 12
         "*** YOUR CODE HERE ***"
+        if not gamestate.has_queen:
+            gamestate.has_queen = True
+            return super(cls, cls).construct(gamestate)
+        return None
         # END Problem 12
 
     def action(self, gamestate):
@@ -453,6 +468,20 @@ class QueenAnt(Ant):  # You should change this line
         """
         # BEGIN Problem 12
         "*** YOUR CODE HERE ***"
+        super().action(gamestate)
+        
+        curr_place = self.place.exit
+        while curr_place is not None:
+            ant_in_place = curr_place.ant
+            if ant_in_place and ant_in_place not in self.buffed:
+                ant_in_place.damage *= 2
+                self.buffed.append(ant_in_place)
+            if ant_in_place and ant_in_place.is_container and ant_in_place.ant_contained:
+                inner_ant = ant_in_place.ant_contained
+                if inner_ant not in self.buffed:
+                    inner_ant.damage *= 2
+                    self.buffed.append(inner_ant)
+            curr_place = curr_place.exit
         # END Problem 12
 
     def reduce_health(self, amount):
@@ -461,6 +490,9 @@ class QueenAnt(Ant):  # You should change this line
         """
         # BEGIN Problem 12
         "*** YOUR CODE HERE ***"
+        self.health -= amount
+        if self.health <= 0:
+            ants_lose()
         # END Problem 12
 
 
@@ -480,6 +512,7 @@ class Bee(Insect):
     name = 'Bee'
     damage = 1
     # OVERRIDE CLASS ATTRIBUTES HERE
+    is_waterproof = True
 
     def sting(self, ant):
         """Attack an ANT, reducing its health by 1."""
@@ -730,6 +763,7 @@ class GameState:
         self.dimensions = dimensions
         self.active_bees = []
         self.configure(beehive, create_places)
+        self.has_queen = False
 
     def configure(self, beehive, create_places):
         """Configure the places in the colony."""
